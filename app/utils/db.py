@@ -18,36 +18,41 @@ async def fill_db():
     file_path = Path(__file__).parent.resolve() / "videos.json"
     data = await json_file_to_dict(file_path)
 
-    async with local_session() as db:
-        for video_data in data["videos"]:
-            video = Video(
-                id=video_data["id"],
-                creator_id=video_data["creator_id"],
-                video_created_at=datetime.fromisoformat(video_data["video_created_at"]),
-                views_count=video_data["views_count"],
-                likes_count=video_data["likes_count"],
-                comments_count=video_data["comments_count"],
-                reports_count=video_data["reports_count"],
-                created_at=datetime.fromisoformat(video_data["created_at"]),
-                updated_at=datetime.fromisoformat(video_data["updated_at"]),
+    videos = []
+    for video_data in data["videos"]:
+        video = Video(
+            id=video_data["id"],
+            creator_id=video_data["creator_id"],
+            video_created_at=datetime.fromisoformat(video_data["video_created_at"]),
+            views_count=video_data["views_count"],
+            likes_count=video_data["likes_count"],
+            comments_count=video_data["comments_count"],
+            reports_count=video_data["reports_count"],
+            created_at=datetime.fromisoformat(video_data["created_at"]),
+            updated_at=datetime.fromisoformat(video_data["updated_at"]),
+        )
+        videos.append(video)
+
+        snapshots = []
+        for snap_data in video_data.get("snapshots", []):
+            snapshot = VideoSnapshot(
+                id=snap_data["id"],
+                video_id=snap_data["video_id"],
+                views_count=snap_data["views_count"],
+                likes_count=snap_data["likes_count"],
+                comments_count=snap_data["comments_count"],
+                reports_count=snap_data["reports_count"],
+                delta_views_count=snap_data["delta_views_count"],
+                delta_likes_count=snap_data["delta_likes_count"],
+                delta_comments_count=snap_data["delta_comments_count"],
+                delta_reports_count=snap_data["delta_reports_count"],
+                created_at=datetime.fromisoformat(snap_data["created_at"]),
+                updated_at=datetime.fromisoformat(snap_data["updated_at"]),
             )
-            db.add(video)
+            snapshots.append(snapshot)
 
-            for snap_data in video_data.get("snapshots", []):
-                snapshot = VideoSnapshot(
-                    id=snap_data["id"],
-                    video_id=snap_data["video_id"],
-                    views_count=snap_data["views_count"],
-                    likes_count=snap_data["likes_count"],
-                    comments_count=snap_data["comments_count"],
-                    reports_count=snap_data["reports_count"],
-                    delta_views_count=snap_data["delta_views_count"],
-                    delta_likes_count=snap_data["delta_likes_count"],
-                    delta_comments_count=snap_data["delta_comments_count"],
-                    delta_reports_count=snap_data["delta_reports_count"],
-                    created_at=datetime.fromisoformat(snap_data["created_at"]),
-                    updated_at=datetime.fromisoformat(snap_data["updated_at"]),
-                )
-                video.video_snapshots.append(snapshot)
+        video.video_snapshots = snapshots
 
+    async with local_session() as db:
+        db.add_all(videos)
         await db.commit()

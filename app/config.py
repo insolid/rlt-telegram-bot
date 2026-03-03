@@ -23,6 +23,7 @@ class Settings(BaseSettings):
         return str(dsn)
 
     bot_token: str
+    openai_api_key: str
 
 
 settings = Settings()  # type: ignore

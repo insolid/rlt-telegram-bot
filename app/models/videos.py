@@ -1,6 +1,7 @@
 from .base import Base
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from datetime import datetime
+from sqlalchemy import DateTime
 
 
 class Video(Base):
@@ -8,7 +9,7 @@ class Video(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     creator_id: Mapped[str] = mapped_column()
-    video_created_at: Mapped[datetime] = mapped_column()
+    video_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     views_count: Mapped[int] = mapped_column()
     likes_count: Mapped[int] = mapped_column()
     comments_count: Mapped[int] = mapped_column()

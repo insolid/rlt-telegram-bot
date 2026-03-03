@@ -11,6 +11,7 @@ msg_router = Router()
 @msg_router.message()
 async def msg_handler(message: Message):
     sql_query, err = await create_sql_query(str(message.text))
+    print('Внутрии msg handler')
     if err:
         await message.answer(err)
         return

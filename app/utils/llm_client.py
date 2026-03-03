@@ -1,8 +1,6 @@
 from openai import AsyncOpenAI
+
 from app.config import settings
-
-client = AsyncOpenAI(api_key=settings.openai_api_key)
-
 
 DEFAULT_PROMPT = """
 Ты — эксперт по PostgreSQL. Твоя задача — переводить вопросы пользователя на русском языке в SQL-запросы.
@@ -61,28 +59,29 @@ class VideoSnapshot(Base):
 
 в код SQL на основе моделей, которые я описал.
 В качестве ответа просто верни SQL запрос без каких либо пояснений или форматирования.
-То есть верни чистый SQL код и ничего больше!
+То есть верни чистый текст SQL кода и ничего больше!
+Только текст!!! Никаких спецсимволов типа ` \n и т.д.!
+Верни ПРОСТО СЫРОЙ ТЕКСТ ОДНОЙ СТРОКОЙ!!! Обычный ТЕКСТ!!!
+Не в формате кода! А просто ТЕКСТ ОДНОЙ СТРОКОЙ!!!
+БЕЗ MARKDOWN СИМВОЛОВ!
 
 А теперь переведи запрос ниже в SQL код:
 """
 
+client = AsyncOpenAI(
+    api_key=settings.openai_api_key,
+    base_url="https://openrouter.ai/api/v1",
+)
+
 
 async def create_sql_query(msg: str):
     """Convert text to raw SQL query using LLM"""
-
-    res = await client.responses.create(
-        model="gpt-5.2",
-        input=DEFAULT_PROMPT + "\n" + msg,
-    )
-    print(res.output_text)
-
-
-# from openai import OpenAI
-
-# client = OpenAI(api_key="")
-
-# response = client.responses.create(
-#     model="gpt-4o-mini", input="Write a one-sentence bedtime story about a unicorn."
-# )
-
-# print(response.output_text)
+    try:
+        res = await client.responses.create(
+            model="stepfun/step-3.5-flash:free",
+            input=DEFAULT_PROMPT + "\n" + msg,
+        )
+        print("SQL запрос от LLM: ", res.output_text)
+        return [str(res.output_text), None]
+    except:
+        return [None, "LLM не отвечает"]

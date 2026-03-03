@@ -1,7 +1,9 @@
-from .base import Base
-from sqlalchemy.orm import mapped_column, Mapped, relationship
 from datetime import datetime
+
 from sqlalchemy import DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base
 
 
 class Video(Base):

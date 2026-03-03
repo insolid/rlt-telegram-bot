@@ -7,7 +7,7 @@ services:
       - .:/app
     env_file:
       - .env
-    command: "python3 -m app.bot"
+    command: sh -c "alembic upgrade head && alembic revision --autogenerate && alembic upgrade head && python3 -m app.bot"
     depends_on:
       - db
 

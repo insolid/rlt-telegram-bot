@@ -1,22 +1,24 @@
-from aiogram import Bot, Dispatcher, html, Router
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
+from aiogram import Router
 from aiogram.types import Message
-from app.utils.llm_client import create_sql_query
-from app.db_config import local_session
 from sqlalchemy import text
+
+from app.db_config import local_session
+from app.utils.llm_client import create_sql_query
 
 msg_router = Router()
 
 
 @msg_router.message()
 async def msg_handler(message: Message):
-    # sql_query = await create_sql_query(str(message.text))
+    sql_query, err = await create_sql_query(str(message.text))
+    if err:
+        await message.answer(err)
+        return
 
-    # async with local_session() as db:
-    #     res = await db.execute(text(str(sql_query)))
-    #     answer = await res.scalar_one()
-
-    # await message.answer(str(answer))
-    await message.answer("Привет! Я могу ответить на вопросы о видео. Просто задай мне вопрос, и я постараюсь помочь!")
+    try:
+        async with local_session() as db:
+            res = await db.execute(text(sql_query))
+            scalar = res.scalar_one()
+            await message.answer(str(scalar))
+    except:
+        await message.answer("Не могу ответить на этот запрос")

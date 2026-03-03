@@ -2,19 +2,17 @@ import asyncio
 import logging
 import sys
 
-import asyncio
-from aiogram import Bot, Dispatcher, html
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
-from aiogram.types import Message
-from app.config import settings
-from app.handlers import commands, messages
-from app.utils.db import fill_db
-from app.db_config import local_session
-from app.models.videos import Video
-from app.models.video_snapshots import VideoSnapshot
 from sqlalchemy import select
+
+from app.config import settings
+from app.db_config import local_session
+from app.handlers import commands, messages
+from app.models.video_snapshots import VideoSnapshot
+from app.models.videos import Video
+from app.utils.db import fill_db
 
 TOKEN = settings.bot_token
 
@@ -28,7 +26,7 @@ async def main():
     async with local_session() as db:
         videos = await db.scalars(select(Video))
         snaps = await db.scalars(select(VideoSnapshot))
-        if not videos and not snaps:
+        if not videos.all() and not snaps.all():
             await fill_db()
 
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

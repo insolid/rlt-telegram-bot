@@ -76,13 +76,12 @@ client = AsyncOpenAI(
 
 
 async def create_sql_query(msg: str):
-    """Convert text to raw SQL query using LLM"""
+    """Convert text to SQL query using LLM"""
     try:
         res = await client.responses.create(
             model="stepfun/step-3.5-flash:free",
             input=DEFAULT_PROMPT + "\n" + msg,
         )
-        print("SQL запрос от LLM: ", res.output_text)
         return [str(res.output_text), None]
     except:
         return [None, "LLM не отвечает"]

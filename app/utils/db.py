@@ -15,9 +15,11 @@ async def json_file_to_dict(file_path: Path) -> dict:
 
 
 async def fill_db():
+    """Fill db with initial data"""
     file_path = Path(__file__).parent.resolve() / "videos.json"
     data = await json_file_to_dict(file_path)
 
+    # Create video and video_snapshot instances from file data
     videos = []
     for video_data in data["videos"]:
         video = Video(
@@ -53,6 +55,7 @@ async def fill_db():
 
         video.video_snapshots = snapshots
 
+    # Save collected instances to DB
     async with local_session() as db:
         db.add_all(videos)
         await db.commit()

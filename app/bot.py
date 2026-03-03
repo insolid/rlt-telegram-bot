@@ -24,9 +24,9 @@ dp.include_routers(commands.cmd_router, messages.msg_router)
 async def main():
     # Init database if it's empty
     async with local_session() as db:
-        videos = await db.scalars(select(Video))
-        snaps = await db.scalars(select(VideoSnapshot))
-        if not videos.all() and not snaps.all():
+        videos_exist = await db.scalar(select(Video).exists().select())
+        snaps_exist = await db.scalar(select(VideoSnapshot).exists().select())
+        if not videos_exist and not snaps_exist:
             await fill_db()
 
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

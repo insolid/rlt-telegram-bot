@@ -8,3 +8,4 @@ pytest-cov==7.0.0
 pytest-asyncio==1.2.0
 sqlalchemy==2.0.43
 aiosqlite==0.21.0
+openai==2.24.0

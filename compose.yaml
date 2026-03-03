@@ -7,7 +7,7 @@ services:
       - .:/app
     env_file:
       - .env
-    # command: 
+    command: "python3 -m app.bot"
     depends_on:
       - db
 
